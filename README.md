@@ -1,5 +1,7 @@
 # Gym Management API Documentation
 
+I will upload the frontend later
+
 ## Base URL
 `http://localhost:8000/api`
 
