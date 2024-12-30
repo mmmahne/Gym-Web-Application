@@ -1,66 +1,663 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Gym Management API Documentation
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Base URL
+`http://localhost:8000/api`
 
-## About Laravel
+## Authentication
+All API requests require authentication token except for login and register endpoints.
+Include the token in request headers: 
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Endpoints
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Authentication
+#### Login
+- **POST** `/auth/login`
+- **Body:**
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "password"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "data": {
+      "token": "your_access_token",
+      "user": {
+        "id": 1,
+        "name": "User Name",
+        "email": "user@example.com",
+        "role": "user"
+      }
+    },
+    "message": "Login successful"
+  }
+  ```
 
-## Learning Laravel
+#### Register
+- **POST** `/auth/register`
+- **Body:**
+  ```json
+  {
+    "name": "User Name",
+    "email": "user@example.com",
+    "password": "password",
+    "password_confirmation": "password",
+    "phone": "1234567890",
+    "address": "123 Street"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "data": {
+      "token": "your_access_token",
+      "user": {
+        "id": 1,
+        "name": "User Name",
+        "email": "user@example.com",
+        "role": "user"
+      }
+    },
+    "message": "Registration successful"
+  }
+  ```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+#### Logout
+- **POST** `/auth/logout`
+- **Headers:** Required authentication token
+- **Response:**
+  ```json
+  {
+    "message": "Logged out successfully"
+  }
+  ```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Profile Management
+#### View Profile
+- **GET** `/profile`
+- **Headers:** Required authentication token
+- **Response:**
+  ```json
+  {
+    "data": {
+      "id": 1,
+      "name": "User Name",
+      "email": "user@example.com",
+      "phone": "1234567890",
+      "address": "123 Street",
+      "role": "user"
+    }
+  }
+  ```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+#### Update Profile
+- **PUT** `/profile`
+- **Headers:** Required authentication token
+- **Body:**
+  ```json
+  {
+    "name": "Updated Name",
+    "phone": "0987654321",
+    "address": "456 Avenue"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "data": {
+      "id": 1,
+      "name": "Updated Name",
+      "email": "user@example.com",
+      "phone": "0987654321",
+      "address": "456 Avenue"
+    },
+    "message": "Profile updated successfully"
+  }
+  ```
 
-## Laravel Sponsors
+#### Update Password
+- **PUT** `/profile/password`
+- **Headers:** Required authentication token
+- **Body:**
+  ```json
+  {
+    "current_password": "old_password",
+    "password": "new_password",
+    "password_confirmation": "new_password"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "message": "Password updated successfully"
+  }
+  ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Gym Classes
+#### List All Classes
+- **GET** `/classes`
+- **Headers:** Required authentication token
+- **Query Parameters:**
+  - `date` (optional): Filter by date (YYYY-MM-DD)
+  - `type` (optional): Filter by class type
+- **Response:**
+  ```json
+  {
+    "data": [
+      {
+        "id": 1,
+        "name": "Yoga Class",
+        "description": "Beginner friendly yoga class",
+        "type": "yoga",
+        "trainer_id": 2,
+        "max_capacity": 20,
+        "trainer": {
+          "id": 2,
+          "name": "Trainer Name"
+        }
+      }
+    ]
+  }
+  ```
 
-### Premium Partners
+#### Get Class Schedule
+- **GET** `/classes/schedule`
+- **Headers:** Required authentication token
+- **Query Parameters:**
+  - `from_date` (optional): Start date (YYYY-MM-DD)
+  - `to_date` (optional): End date (YYYY-MM-DD)
+- **Response:**
+  ```json
+  {
+    "data": [
+      {
+        "date": "2024-03-21",
+        "classes": [
+          {
+            "id": 1,
+            "name": "Yoga Class",
+            "time": "09:00:00",
+            "available_slots": 15
+          }
+        ]
+      }
+    ]
+  }
+  ```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+#### Create Class (Trainer/Admin only)
+- **POST** `/classes`
+- **Headers:** Required authentication token
+- **Body:**
+  ```json
+  {
+    "name": "New Yoga Class",
+    "description": "Description of the class",
+    "type": "yoga",
+    "max_capacity": 20,
+    "schedule": [
+      {
+        "day": "monday",
+        "time": "09:00",
+        "duration": 60
+      }
+    ]
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "data": {
+      "id": 1,
+      "name": "New Yoga Class",
+      "type": "yoga",
+      "max_capacity": 20
+    },
+    "message": "Class created successfully"
+  }
+  ```
 
-## Contributing
+### Bookings
+#### List User's Bookings
+- **GET** `/bookings/my`
+- **Headers:** Required authentication token
+- **Query Parameters:**
+  - `status` (optional): Filter by status (confirmed, cancelled, completed)
+- **Response:**
+  ```json
+  {
+    "data": [
+      {
+        "id": 1,
+        "class": {
+          "id": 1,
+          "name": "Yoga Class",
+          "type": "yoga"
+        },
+        "booking_date": "2024-03-21",
+        "status": "confirmed",
+        "attended": false
+      }
+    ]
+  }
+  ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+#### Book a Class
+- **POST** `/bookings`
+- **Headers:** Required authentication token
+- **Body:**
+  ```json
+  {
+    "class_id": 1,
+    "booking_date": "2024-03-21"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "data": {
+      "id": 1,
+      "class": {
+        "name": "Yoga Class",
+        "type": "yoga"
+      },
+      "booking_date": "2024-03-21",
+      "status": "confirmed"
+    },
+    "message": "Booking confirmed successfully"
+  }
+  ```
 
-## Code of Conduct
+#### Cancel Booking
+- **POST** `/bookings/{booking_id}/cancel`
+- **Headers:** Required authentication token
+- **Response:**
+  ```json
+  {
+    "data": {
+      "id": 1,
+      "status": "cancelled"
+    },
+    "message": "Booking cancelled successfully"
+  }
+  ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+#### View Booking Details
+- **GET** `/bookings/{booking_id}`
+- **Headers:** Required authentication token
+- **Response:**
+  ```json
+  {
+    "data": {
+      "id": 1,
+      "class": {
+        "id": 1,
+        "name": "Yoga Class",
+        "type": "yoga",
+        "trainer": {
+          "name": "Trainer Name"
+        }
+      },
+      "booking_date": "2024-03-21",
+      "status": "confirmed",
+      "attended": false
+    }
+  }
+  ```
 
-## Security Vulnerabilities
+### Memberships
+#### List All Memberships (Admin only)
+- **GET** `/memberships`
+- **Headers:** Required authentication token
+- **Response:**
+  ```json
+  {
+    "data": [
+      {
+        "id": 1,
+        "user": {
+          "id": 1,
+          "name": "User Name"
+        },
+        "start_date": "2024-03-01",
+        "end_date": "2024-04-01",
+        "type": "monthly",
+        "is_active": true,
+        "payment_status": "paid"
+      }
+    ]
+  }
+  ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+#### Get Active Membership
+- **GET** `/memberships/active`
+- **Headers:** Required authentication token
+- **Response:**
+  ```json
+  {
+    "data": {
+      "id": 1,
+      "start_date": "2024-03-01",
+      "end_date": "2024-04-01",
+      "type": "monthly",
+      "is_active": true,
+      "payment_status": "paid"
+    }
+  }
+  ```
 
-## License
+#### Create Membership (Admin only)
+- **POST** `/memberships`
+- **Headers:** Required authentication token
+- **Body:**
+  ```json
+  {
+    "user_id": 1,
+    "type": "monthly",
+    "start_date": "2024-03-01",
+    "end_date": "2024-04-01",
+    "payment_status": "paid"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "data": {
+      "id": 1,
+      "user_id": 1,
+      "type": "monthly",
+      "start_date": "2024-03-01",
+      "end_date": "2024-04-01",
+      "is_active": true
+    },
+    "message": "Membership created successfully"
+  }
+  ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Check-ins
+#### User Check-in
+- **POST** `/check-in`
+- **Headers:** Required authentication token
+- **Response:**
+  ```json
+  {
+    "data": {
+      "membership": {
+        "id": 1,
+        "type": "monthly",
+        "end_date": "2024-04-01"
+      },
+      "check_in": {
+        "id": 1,
+        "user_id": 1,
+        "check_in_time": "2024-03-21 09:00:00",
+        "status": "completed"
+      }
+    },
+    "message": "Check-in successful"
+  }
+  ```
+
+#### Check-in to Class
+- **POST** `/check-in/class/{booking_id}`
+- **Headers:** Required authentication token
+- **Response:**
+  ```json
+  {
+    "data": {
+      "id": 1,
+      "class": {
+        "name": "Yoga Class"
+      },
+      "check_in_time": "2024-03-21 09:00:00",
+      "status": "completed"
+    },
+    "message": "Class check-in successful"
+  }
+  ```
+
+#### View Check-in History (Admin only)
+- **GET** `/check-in/history`
+- **Headers:** Required authentication token
+- **Query Parameters:**
+  - `from_date` (optional): Filter from date
+  - `to_date` (optional): Filter to date
+  - `user_id` (optional): Filter by user
+- **Response:**
+  ```json
+  {
+    "data": [
+      {
+        "id": 1,
+        "user": {
+          "id": 1,
+          "name": "User Name"
+        },
+        "check_in_time": "2024-03-21 09:00:00",
+        "class": null,
+        "status": "completed"
+      }
+    ]
+  }
+  ```
+
+### Attendance
+#### Mark Attendance (Trainer/Admin only)
+- **POST** `/attendance/bookings/{booking_id}`
+- **Headers:** Required authentication token
+- **Body:**
+  ```json
+  {
+    "attended": true
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "data": {
+      "id": 1,
+      "user": {
+        "name": "User Name"
+      },
+      "class": {
+        "name": "Yoga Class"
+      },
+      "attended": true
+    },
+    "message": "Attendance marked successfully"
+  }
+  ```
+
+#### Get Class Attendance (Trainer/Admin only)
+- **GET** `/attendance/class`
+- **Query Parameters:**
+  - `class_id`: Required class ID
+  - `date`: Required date (YYYY-MM-DD)
+- **Response:**
+  ```json
+  {
+    "data": {
+      "class": {
+        "id": 1,
+        "name": "Yoga Class"
+      },
+      "date": "2024-03-21",
+      "attendees": [
+        {
+          "user_id": 1,
+          "name": "User Name",
+          "attended": true,
+          "check_in_time": "2024-03-21 09:00:00"
+        }
+      ]
+    }
+  }
+  ```
+
+#### View My Attendance (User)
+- **GET** `/attendance/my`
+- **Query Parameters:**
+  - `from_date` (optional): Start date
+  - `to_date` (optional): End date
+- **Response:**
+  ```json
+  {
+    "data": [
+      {
+        "date": "2024-03-21",
+        "class": {
+          "name": "Yoga Class"
+        },
+        "attended": true,
+        "check_in_time": "2024-03-21 09:00:00"
+      }
+    ]
+  }
+  ```
+
+### Statistics
+#### Dashboard Stats (Admin only)
+- **GET** `/stats/dashboard`
+- **Headers:** Required authentication token
+- **Response:**
+  ```json
+  {
+    "data": {
+      "total_users": 150,
+      "active_memberships": 120,
+      "today_check_ins": 45,
+      "today_classes": 8,
+      "monthly_stats": {
+        "new_users": 20,
+        "class_attendance": 350,
+        "check_ins": 800
+      }
+    }
+  }
+  ```
+
+#### User Stats
+- **GET** `/stats/user`
+- **Headers:** Required authentication token
+- **Response:**
+  ```json
+  {
+    "data": {
+      "total_classes_attended": 25,
+      "total_check_ins": 45,
+      "current_streak": 5,
+      "monthly_attendance": 15,
+      "membership_status": {
+        "is_active": true,
+        "expires_in": "20 days"
+      }
+    }
+  }
+  ```
+
+### Error Handling
+All error responses follow this format:
+```json
+{
+  "message": "Error message here",
+  "errors": {
+    "field_name": [
+      "Validation error message"
+    ]
+  }
+}
+```
+
+Common HTTP Status Codes:
+- `200`: Success
+- `201`: Created
+- `400`: Bad Request
+- `401`: Unauthorized
+- `403`: Forbidden
+- `404`: Not Found
+- `422`: Validation Error
+- `500`: Server Error
+
+### Common Response Format
+All successful responses follow this format:
+```json
+{
+  "data": {
+    // Response data here
+  },
+  "message": "Success message (optional)"
+}
+```
+
+For paginated responses:
+```json
+{
+  "data": [
+    // Array of items
+  ],
+  "meta": {
+    "current_page": 1,
+    "per_page": 15,
+    "total": 50,
+    "total_pages": 4
+  },
+  "links": {
+    "first": "http://api.example.com/items?page=1",
+    "last": "http://api.example.com/items?page=4",
+    "prev": null,
+    "next": "http://api.example.com/items?page=2"
+  }
+}
+```
+
+### Authentication Headers
+For protected routes, include the token in the Authorization header:
+```
+Authorization: Bearer your_access_token_here
+```
+
+### Rate Limiting
+The API implements rate limiting to prevent abuse:
+- 60 requests per minute for authenticated users
+- 30 requests per minute for unauthenticated users
+
+Rate limit headers in response:
+```
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 59
+X-RateLimit-Reset: 1616774400
+```
+
+### File Upload
+For endpoints that accept file uploads:
+- Maximum file size: 5MB
+- Supported formats: jpg, jpeg, png
+- Use multipart/form-data content type
+
+### Development Setup
+1. Clone the repository
+2. Copy `.env.example` to `.env`
+3. Configure database settings in `.env`
+4. Run:
+   ```bash
+   composer install
+   php artisan key:generate
+   php artisan migrate
+   php artisan db:seed
+   ```
+
+### Testing
+Run the test suite:
+```bash
+php artisan test
+```
+
+Or run specific test:
+```bash
+php artisan test --filter=TestName
+```
+
+  
